@@ -1,5 +1,9 @@
 # OpenClaw Nexus
 
+[![npm version](https://img.shields.io/npm/v/@houchenyang/nexus-gateway)](https://www.npmjs.com/package/@houchenyang/nexus-gateway)
+[![GitHub stars](https://img.shields.io/github/stars/hcy050617/openclaw-nexus)](https://github.com/hcy050617/openclaw-nexus)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 [中文](./README.md) | English
 
 AI Chat Forwarding Gateway - Solve rate limiting issues for enterprise IM applications.
@@ -123,8 +127,8 @@ openclaw config set channels.nexus.botId "my-bot"
 
 ```bash
 # Clone the project
-git clone https://github.com/hcy050617/nexus.git
-cd nexus
+git clone https://github.com/hcy050617/openclaw-nexus.git
+cd openclaw-nexus
 
 # Install dependencies
 cd nexus-gateway && pnpm install && pnpm build

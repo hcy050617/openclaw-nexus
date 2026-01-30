@@ -2,7 +2,7 @@
 
 AI Bot Gateway - 连接 Web 用户与 AI 助手的网关服务。
 
-> 这是 [OpenClaw Nexus](https://github.com/hcy050617/nexus) 项目的网关服务端组件。
+> 这是 [OpenClaw Nexus](https://github.com/hcy050617/openclaw-nexus) 项目的网关服务端组件。
 
 ## 特性
 
@@ -61,8 +61,8 @@ nohup nexus-gateway > nexus.log 2>&1 &
 ## 源码运行
 
 ```bash
-git clone https://github.com/hcy050617/nexus.git
-cd nexus/nexus-gateway
+git clone https://github.com/hcy050617/openclaw-nexus.git
+cd openclaw-nexus/nexus-gateway
 pnpm install
 pnpm build
 

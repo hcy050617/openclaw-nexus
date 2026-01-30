@@ -18,12 +18,16 @@
     "ai",
     "chat",
     "websocket",
-    "openclaw"
+    "openclaw",
+    "claude",
+    "openai",
+    "chatbot",
+    "streaming"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hcy050617/nexus"
+    "url": "https://github.com/hcy050617/openclaw-nexus"
   },
   "files": [
     "dist",

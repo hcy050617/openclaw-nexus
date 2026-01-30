@@ -6,7 +6,7 @@
 
 ### 报告问题
 
-如果你发现了 Bug 或有功能建议，请在 [GitHub Issues](https://github.com/hcy050617/nexus/issues) 中提交。
+如果你发现了 Bug 或有功能建议，请在 [GitHub Issues](https://github.com/hcy050617/openclaw-nexus/issues) 中提交。
 
 提交 Issue 时请包含：
 
@@ -55,8 +55,8 @@ docs: update installation guide
 
 ```bash
 # 克隆项目
-git clone https://github.com/hcy050617/nexus.git
-cd nexus
+git clone https://github.com/hcy050617/openclaw-nexus.git
+cd openclaw-nexus
 
 # 开发网关
 cd nexus-gateway

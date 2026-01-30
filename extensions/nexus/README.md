@@ -1,8 +1,8 @@
 # Nexus Channel
 
-OpenClaw 插件，用于连接 [Nexus Gateway](https://github.com/hcy050617/nexus) 网关服务。
+OpenClaw 插件，用于连接 [Nexus Gateway](https://github.com/hcy050617/openclaw-nexus) 网关服务。
 
-> 这是 [OpenClaw Nexus](https://github.com/hcy050617/nexus) 项目的客户端插件组件。
+> 这是 [OpenClaw Nexus](https://github.com/hcy050617/openclaw-nexus) 项目的客户端插件组件。
 
 ## 功能
 
@@ -23,7 +23,7 @@ openclaw plugins install @houchenyang/nexus
 
 ```bash
 # 克隆或下载到 extensions 目录
-git clone https://github.com/hcy050617/nexus.git ~/.openclaw/extensions/nexus
+git clone https://github.com/hcy050617/openclaw-nexus.git ~/.openclaw/extensions/nexus
 
 # 安装依赖并编译
 cd ~/.openclaw/extensions/nexus
@@ -163,8 +163,8 @@ nexus-channel/
 
 ## 相关项目
 
-- [OpenClaw Nexus](https://github.com/hcy050617/nexus) - 主项目
-- [Nexus Gateway](https://github.com/hcy050617/nexus/tree/master/nexus-gateway) - 网关服务端
+- [OpenClaw Nexus](https://github.com/hcy050617/openclaw-nexus) - 主项目
+- [Nexus Gateway](https://github.com/hcy050617/openclaw-nexus/tree/master/nexus-gateway) - 网关服务端
 
 ## License
 

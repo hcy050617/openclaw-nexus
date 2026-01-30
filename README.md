@@ -1,9 +1,14 @@
 # OpenClaw Nexus
 
+[![npm version](https://img.shields.io/npm/v/@houchenyang/nexus-gateway)](https://www.npmjs.com/package/@houchenyang/nexus-gateway)
+[![GitHub stars](https://img.shields.io/github/stars/hcy050617/openclaw-nexus)](https://github.com/hcy050617/openclaw-nexus)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 中文 | [English](./README_EN.md)
 
 AI 对话转发网关 - 解决国内企业级 IM 应用额度限制问题。
-
+![img.png](img.png)
+![img_1.png](img_1.png)
 ## 痛点
 
 在国内使用 AI 助手对接企业级 IM（如飞书、钉钉、企业微信）时，常常面临：
@@ -123,8 +128,8 @@ openclaw config set channels.nexus.botId "my-bot"
 
 ```bash
 # 克隆项目
-git clone https://github.com/hcy050617/nexus.git
-cd nexus
+git clone https://github.com/hcy050617/openclaw-nexus.git
+cd openclaw-nexus
 
 # 安装依赖
 cd nexus-gateway && pnpm install && pnpm build
