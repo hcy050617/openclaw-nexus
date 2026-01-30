@@ -1,21 +1,25 @@
 {
-  "name": "@moltbot/nexus",
-  "version": "1.0.0",
+  "name": "@houchenyang/nexus",
+  "version": "1.0.1",
   "type": "module",
-  "description": "Clawdbot/Moltbot channel plugin for connecting to Nexus Gateway",
+  "description": "OpenClaw channel plugin for connecting to Nexus Gateway",
   "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hcy050617/nexus"
+  },
   "files": [
     "dist",
-    "index.ts",
-    "src"
+    "openclaw.plugin.json"
   ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm build"
   },
-  "clawdbot": {
+  "openclaw": {
     "extensions": [
       "./dist/index.js"
     ],
@@ -27,16 +31,16 @@
       "order": 80
     }
   },
+  "keywords": ["openclaw", "nexus", "gateway", "channel", "plugin"],
   "dependencies": {
     "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@types/ws": "^8.5.10",
-    "clawdbot": "2026.1.24-2",
     "typescript": "^5.7.0"
   },
   "peerDependencies": {
-    "clawdbot": ">=2026.1.24"
+    "openclaw": ">=2026.1.24"
   }
 }

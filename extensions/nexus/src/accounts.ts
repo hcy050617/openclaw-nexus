@@ -1,6 +1,6 @@
-import type { ClawdbotConfig } from "clawdbot/plugin-sdk";
+import type { OpenclawConfig } from "openclaw/plugin-sdk";
 import type { GatewayConfig, ResolvedGatewayAccount } from "./types.js";
-import { DEFAULT_ACCOUNT_ID } from "clawdbot/plugin-sdk";
+import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk";
 
 export function resolveGatewayCredentials(cfg?: GatewayConfig): { serverUrl: string; botId: string; token?: string } | null {
   if (!cfg?.serverUrl || !cfg?.botId) {
@@ -13,7 +13,7 @@ export function resolveGatewayCredentials(cfg?: GatewayConfig): { serverUrl: str
   };
 }
 
-export function resolveGatewayAccount(params: { cfg: ClawdbotConfig }): ResolvedGatewayAccount {
+export function resolveGatewayAccount(params: { cfg: OpenclawConfig }): ResolvedGatewayAccount {
   const gatewayCfg = params.cfg.channels?.nexus as GatewayConfig | undefined;
   const creds = resolveGatewayCredentials(gatewayCfg);
 

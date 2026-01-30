@@ -1,5 +1,5 @@
-import type { ChannelPlugin, ClawdbotConfig } from "clawdbot/plugin-sdk";
-import { DEFAULT_ACCOUNT_ID } from "clawdbot/plugin-sdk";
+import type { ChannelPlugin, OpenclawConfig } from "openclaw/plugin-sdk";
+import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk";
 import type { ResolvedGatewayAccount, GatewayConfig } from "./types.js";
 import { resolveGatewayAccount, resolveGatewayCredentials } from "./accounts.js";
 import { gatewayOutbound } from "./outbound.js";
@@ -76,7 +76,7 @@ export const gatewayPlugin: ChannelPlugin<ResolvedGatewayAccount> = {
       },
     }),
     deleteAccount: ({ cfg }) => {
-      const next = { ...cfg } as ClawdbotConfig;
+      const next = { ...cfg } as OpenclawConfig;
       const nextChannels = { ...cfg.channels };
       delete (nextChannels as Record<string, unknown>).nexus;
       if (Object.keys(nextChannels).length > 0) {

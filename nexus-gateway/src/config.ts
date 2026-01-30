@@ -1,9 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_PATH = path.resolve(__dirname, "../config.json");
+const CWD_CONFIG = path.resolve(process.cwd(), "config.json");
 
 export type UserConfig = {
   password: string;
@@ -15,6 +13,7 @@ export type Config = {
   sessionTTL: number;
   pingInterval: number;
   botTimeout: number;
+  botToken: string;  // Token for bot authentication
   users: Record<string, UserConfig>;
 };
 
@@ -23,6 +22,7 @@ const defaultConfig: Config = {
   sessionTTL: 24 * 60 * 60 * 1000, // 24 hours
   pingInterval: 30000,
   botTimeout: 90000,
+  botToken: "",  // Empty means no authentication required
   users: {
     admin: {
       password: "admin123",
@@ -32,13 +32,14 @@ const defaultConfig: Config = {
 };
 
 export function loadConfig(): Config {
-  if (!fs.existsSync(CONFIG_PATH)) {
-    console.log("[Config] config.json not found, creating default...");
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2));
+  // Always create config.json in current directory if not exists
+  if (!fs.existsSync(CWD_CONFIG)) {
+    console.log("[Config] Creating config.json in current directory...");
+    fs.writeFileSync(CWD_CONFIG, JSON.stringify(defaultConfig, null, 2));
   }
 
   try {
-    const content = fs.readFileSync(CONFIG_PATH, "utf-8");
+    const content = fs.readFileSync(CWD_CONFIG, "utf-8");
     const fileConfig = JSON.parse(content) as Partial<Config>;
 
     // Merge with defaults

@@ -1,8 +1,14 @@
+#!/usr/bin/env node
 import express from "express";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import { WebSocketServer, WebSocket } from "ws";
 import { createServer } from "http";
 import { BotManager } from "./bot-manager.js";
 import { loadConfig } from "./config.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import {
   createSession,
   validateSession,
@@ -15,7 +21,7 @@ import type { BotMessage, UserChatRequest, LoginRequest } from "./types.js";
 const config = loadConfig();
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "20mb" })); // 支持图片上传
 
 // CORS
 app.use((req, res, next) => {
@@ -32,6 +38,7 @@ const server = createServer(app);
 const botManager = new BotManager({
   pingInterval: config.pingInterval,
   botTimeout: config.botTimeout,
+  botToken: config.botToken,
 });
 
 // Session cleanup
@@ -53,9 +60,14 @@ wss.on("connection", (ws: WebSocket) => {
       const msg = JSON.parse(data.toString()) as BotMessage;
 
       if (msg.type === "register") {
-        const success = botManager.register(ws, msg.botId, msg.botName, msg.token);
-        ws.send(JSON.stringify({ type: "registered", success }));
-        console.log(`[Nexus] Bot registered: ${msg.botId}`);
+        const result = botManager.register(ws, msg.botId, msg.botName, msg.token);
+        ws.send(JSON.stringify({ type: "registered", success: result.success, error: result.error }));
+        if (result.success) {
+          console.log(`[Nexus] Bot registered: ${msg.botId}`);
+        } else {
+          console.log(`[Nexus] Bot registration failed: ${msg.botId} - ${result.error}`);
+          ws.close();
+        }
         return;
       }
 
@@ -189,6 +201,63 @@ app.post("/api/chat", auth, async (req, res) => {
   }
 });
 
+// Streaming chat endpoint using SSE
+app.post("/api/chat/stream", auth, async (req, res) => {
+  const { message, target, image } = req.body as UserChatRequest;
+  const user = (req as any).user;
+
+  if (!message && !image) {
+    return res.status(400).json({ error: "消息不能为空" });
+  }
+
+  let botId = target;
+  let text = message || "";
+
+  if (!botId && message) {
+    const match = message.match(/^@(\S+)\s+/);
+    if (match) {
+      botId = match[1];
+      text = message.slice(match[0].length);
+    } else {
+      botId = botManager.getFirstAvailable();
+    }
+  } else if (!botId) {
+    botId = botManager.getFirstAvailable();
+  }
+
+  if (!botId) {
+    return res.status(503).json({ error: "没有可用的机器人" });
+  }
+
+  const bot = botManager.getBot(botId);
+
+  // Set up SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.flushHeaders();
+
+  // Send initial event with botId and botName
+  res.write(`data: ${JSON.stringify({ type: "start", botId, botName: bot?.name || botId })}\n\n`);
+
+  try {
+    await botManager.sendToBot(
+      botId,
+      text,
+      user.displayName || user.username,
+      (chunk, done) => {
+        res.write(`data: ${JSON.stringify({ type: "chunk", content: chunk, done })}\n\n`);
+      },
+      image
+    );
+    res.write(`data: ${JSON.stringify({ type: "end" })}\n\n`);
+    res.end();
+  } catch (err) {
+    res.write(`data: ${JSON.stringify({ type: "error", error: String(err) })}\n\n`);
+    res.end();
+  }
+});
+
 // Health check
 app.get("/health", (req, res) => {
   const bots = botManager.listBots();
@@ -198,6 +267,25 @@ app.get("/health", (req, res) => {
     botIds: bots.map((b) => b.id),
   });
 });
+
+// Static files: prioritize current working directory, fallback to package bundled
+const cwdPublic = path.resolve(process.cwd(), "index.html");
+const pkgPublic = path.join(__dirname, "..", "public");
+
+if (!fs.existsSync(cwdPublic)) {
+  // Copy index.html from package to current directory
+  const srcHtml = path.join(pkgPublic, "index.html");
+  if (fs.existsSync(srcHtml)) {
+    fs.copyFileSync(srcHtml, cwdPublic);
+    console.log("[Nexus] Created index.html in current directory");
+  }
+}
+
+// Serve index.html from current directory, other static files from package
+app.get("/", (req, res) => {
+  res.sendFile(cwdPublic);
+});
+app.use(express.static(pkgPublic));
 
 // Start
 botManager.start();

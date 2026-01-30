@@ -25,6 +25,7 @@ export type GatewayMessageContext = {
   chatType: "direct" | "group";
   content: string;
   replyTo?: string;
+  image?: string;  // base64 图片数据
 };
 
 export type GatewaySendResult = {
@@ -52,6 +53,7 @@ export type GatewayInboundMessage = {
   content: string;      // message content
   from: string;         // sender identifier (e.g., "web-user")
   replyTo?: string;     // if this is a reply to another message
+  image?: string;       // base64 图片数据
   timestamp: number;
   // Extended fields for group support (optional, for future)
   conversationId?: string;

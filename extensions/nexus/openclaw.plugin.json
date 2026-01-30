@@ -1,0 +1,62 @@
+{
+  "id": "nexus",
+  "name": "Nexus Channel",
+  "description": "Connect OpenClaw to Nexus Gateway for AI bot messaging",
+  "version": "1.0.0",
+  "channels": ["nexus"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "description": "Enable Nexus channel"
+      },
+      "serverUrl": {
+        "type": "string",
+        "description": "Nexus Gateway WebSocket URL"
+      },
+      "botId": {
+        "type": "string",
+        "description": "Bot unique identifier"
+      },
+      "botName": {
+        "type": "string",
+        "description": "Bot display name"
+      },
+      "token": {
+        "type": "string",
+        "description": "Connection token for authentication"
+      },
+      "reconnectInterval": {
+        "type": "integer",
+        "minimum": 1000,
+        "description": "Reconnect interval in milliseconds"
+      },
+      "dmPolicy": {
+        "type": "string",
+        "enum": ["open", "pairing", "allowlist"],
+        "description": "DM policy"
+      },
+      "allowFrom": {
+        "type": "array",
+        "items": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" }
+          ]
+        },
+        "description": "Allowed sender IDs"
+      }
+    }
+  },
+  "uiHints": {
+    "token": {
+      "sensitive": true,
+      "placeholder": "your-secret-token"
+    },
+    "serverUrl": {
+      "placeholder": "ws://your-server:17392/bot-ws"
+    }
+  }
+}

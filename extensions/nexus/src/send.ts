@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import crypto from "crypto";
-import type { ClawdbotConfig } from "clawdbot/plugin-sdk";
+import type { openclawConfig } from "openclaw/plugin-sdk";
 import type { GatewayConfig, GatewaySendResult, GatewayOutboundMessage } from "./types.js";
 import { getGatewayWsClient } from "./monitor.js";
 
@@ -9,7 +9,7 @@ function generateId(): string {
 }
 
 export type SendGatewayMessageParams = {
-  cfg: ClawdbotConfig;
+  cfg: openclawConfig;
   to: string;
   text: string;
   replyToMessageId?: string;

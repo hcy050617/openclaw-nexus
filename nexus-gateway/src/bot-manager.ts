@@ -14,7 +14,7 @@ export class BotManager {
   private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(
-    private config: { pingInterval: number; botTimeout: number }
+    private config: { pingInterval: number; botTimeout: number; botToken: string }
   ) {}
 
   start() {
@@ -32,8 +32,13 @@ export class BotManager {
     }
   }
 
-  register(ws: WebSocket, botId: string, botName: string, token: string): boolean {
-    // Simple token validation - in production, use proper auth
+  register(ws: WebSocket, botId: string, botName: string, token: string): { success: boolean; error?: string } {
+    // Token validation
+    if (this.config.botToken && token !== this.config.botToken) {
+      console.log(`[BotManager] Bot ${botId} rejected: invalid token`);
+      return { success: false, error: "Invalid token" };
+    }
+
     const existing = this.bots.get(botId);
     if (existing) {
       // Disconnect old connection
@@ -50,7 +55,7 @@ export class BotManager {
 
     this.bots.set(botId, { info, ws });
     console.log(`[BotManager] Bot registered: ${botId} (${botName})`);
-    return true;
+    return { success: true };
   }
 
   unregister(botId: string) {
@@ -92,7 +97,8 @@ export class BotManager {
     botId: string,
     content: string,
     from: string,
-    onChunk?: (chunk: string, done: boolean) => void
+    onChunk?: (chunk: string, done: boolean) => void,
+    image?: string
   ): Promise<string> {
     const bot = this.bots.get(botId);
     if (!bot) {
@@ -107,6 +113,10 @@ export class BotManager {
       from,
       timestamp: Date.now(),
     };
+
+    if (image) {
+      msg.image = image;
+    }
 
     return new Promise((resolve, reject) => {
       this.pendingRequests.set(msgId, { resolve, reject, chunks: [], onChunk });
@@ -130,6 +140,10 @@ export class BotManager {
 
   listBots(): BotInfo[] {
     return Array.from(this.bots.values()).map((b) => b.info);
+  }
+
+  getBot(botId: string): BotInfo | undefined {
+    return this.bots.get(botId)?.info;
   }
 
   getFirstAvailable(): string | undefined {

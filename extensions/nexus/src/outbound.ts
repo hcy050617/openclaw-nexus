@@ -1,4 +1,4 @@
-import type { ChannelOutboundAdapter } from "clawdbot/plugin-sdk";
+import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk";
 import { getGatewayRuntime } from "./runtime.js";
 import { sendMessageGateway } from "./send.js";
 

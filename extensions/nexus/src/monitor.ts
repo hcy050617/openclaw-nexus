@@ -1,11 +1,11 @@
 import WebSocket from "ws";
-import type { ClawdbotConfig, RuntimeEnv, HistoryEntry } from "clawdbot/plugin-sdk";
+import type { OpenclawConfig, RuntimeEnv, HistoryEntry } from "openclaw/plugin-sdk";
 import type { GatewayConfig, GatewayInboundMessage, GatewayBotRegister, GatewayWsMessage } from "./types.js";
 import { resolveGatewayCredentials } from "./accounts.js";
 import { handleGatewayMessage } from "./bot.js";
 
 export type MonitorGatewayOpts = {
-  config?: ClawdbotConfig;
+  config?: OpenclawConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   accountId?: string;

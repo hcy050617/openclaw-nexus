@@ -1,17 +1,17 @@
 import WebSocket from "ws";
-import type { ClawdbotConfig, RuntimeEnv, HistoryEntry } from "clawdbot/plugin-sdk";
+import type { OpenclawConfig, RuntimeEnv, HistoryEntry } from "openclaw/plugin-sdk";
 import {
   buildPendingHistoryContextFromMap,
   recordPendingHistoryEntryIfEnabled,
   clearHistoryEntriesIfEnabled,
   DEFAULT_GROUP_HISTORY_LIMIT,
-} from "clawdbot/plugin-sdk";
+} from "openclaw/plugin-sdk";
 import type { GatewayConfig, GatewayInboundMessage, GatewayMessageContext } from "./types.js";
 import { getGatewayRuntime } from "./runtime.js";
 import { createGatewayReplyDispatcher } from "./reply-dispatcher.js";
 
 export function parseGatewayMessageEvent(event: GatewayInboundMessage): GatewayMessageContext {
-  // Gateway server sends: { type: "chat", id, content, from, timestamp }
+  // Gateway server sends: { type: "chat", id, content, from, timestamp, image? }
   // We need to map this to our internal context format
   return {
     messageId: event.id,
@@ -21,11 +21,12 @@ export function parseGatewayMessageEvent(event: GatewayInboundMessage): GatewayM
     chatType: event.chatType ?? "direct",
     content: event.content,
     replyTo: event.replyTo,
+    image: event.image,
   };
 }
 
 export async function handleGatewayMessage(params: {
-  cfg: ClawdbotConfig;
+  cfg: OpenclawConfig;
   event: GatewayInboundMessage;
   runtime?: RuntimeEnv;
   chatHistories?: Map<string, HistoryEntry[]>;
@@ -91,6 +92,16 @@ export async function handleGatewayMessage(params: {
     let messageBody = ctx.content;
     if (ctx.replyTo) {
       messageBody = `[Replying to: "${ctx.replyTo}"]\n\n${ctx.content}`;
+    }
+
+    // 如果有图片，直接将 base64 放入消息体
+    if (ctx.image) {
+      const imageData = ctx.image;
+      if (!messageBody) {
+        messageBody = "请描述这张图片";
+      }
+      // 将图片 base64 数据直接嵌入消息体
+      messageBody = `${messageBody}\n\n[图片数据]\n${imageData}`;
     }
 
     const body = core.channel.reply.formatAgentEnvelope({

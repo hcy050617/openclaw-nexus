@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>OpenClaw Chat</title>
+  <!-- Markdown 解析 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- 代码高亮 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/core.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/python.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/css.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/languages/xml.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      height: 100vh;
+      height: 100dvh; /* 动态视口高度，更好支持移动端 */
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ============ Login Page ============ */
+    .login-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-box .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* ============ Chat Page ============ */
+    .chat-page {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .header {
+      background: rgba(22, 33, 62, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #666;
+    }
+
+    .status-dot.online {
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+    }
+
+    .bot-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bot-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(102, 126, 234, 0.15);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 16px;
+      font-size: 13px;
+      color: #a5b4fc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bot-chip:hover {
+      background: rgba(102, 126, 234, 0.25);
+      border-color: rgba(102, 126, 234, 0.5);
+    }
+
+    .bot-chip .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    /* @ 自动补全 */
+    .mention-popup {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(22, 33, 62, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .mention-popup.show {
+      display: block;
+    }
+
+    .mention-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .mention-item:hover,
+    .mention-item.selected {
+      background: rgba(102, 126, 234, 0.2);
+    }
+
+    .mention-item .bot-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .mention-item .bot-info {
+      flex: 1;
+    }
+
+    .mention-item .bot-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #eee;
+    }
+
+    .mention-item .bot-id {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 15px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.bot .bot-name {
+      font-size: 12px;
+      color: #667eea;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    /* Markdown 样式 */
+    .message.bot .content {
+      line-height: 1.7;
+    }
+
+    .message.bot .content p {
+      margin: 0 0 12px 0;
+    }
+
+    .message.bot .content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .message.bot .content code {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: "Fira Code", "SF Mono", Consolas, monospace;
+      font-size: 13px;
+    }
+
+    .message.bot .content pre {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 12px 0;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .message.bot .content pre code {
+      background: none;
+      padding: 0;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message.bot .content ul,
+    .message.bot .content ol {
+      margin: 12px 0;
+      padding-left: 24px;
+    }
+
+    .message.bot .content li {
+      margin: 4px 0;
+    }
+
+    .message.bot .content h1,
+    .message.bot .content h2,
+    .message.bot .content h3 {
+      margin: 16px 0 8px 0;
+      font-weight: 600;
+    }
+
+    .message.bot .content h1 { font-size: 1.4em; }
+    .message.bot .content h2 { font-size: 1.2em; }
+    .message.bot .content h3 { font-size: 1.1em; }
+
+    .message.bot .content blockquote {
+      border-left: 3px solid #667eea;
+      margin: 12px 0;
+      padding: 8px 16px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .message.bot .content table {
+      border-collapse: collapse;
+      margin: 12px 0;
+      width: 100%;
+    }
+
+    .message.bot .content th,
+    .message.bot .content td {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .message.bot .content th {
+      background: rgba(102, 126, 234, 0.2);
+    }
+
+    .message.bot .content a {
+      color: #a5b4fc;
+      text-decoration: none;
+    }
+
+    .message.bot .content a:hover {
+      text-decoration: underline;
+    }
+
+    .message.bot .content strong {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .message.bot .content hr {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      margin: 16px 0;
+    }
+
+    /* 复制按钮 */
+    .code-block-wrapper {
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .message.bot .content pre:hover .copy-btn {
+      opacity: 1;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    /* 思考中动画 */
+    .thinking-dots {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+
+    .thinking-dots span {
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+    .thinking-dots span:nth-child(3) { animation-delay: 0s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .input-container {
+      padding: 20px 24px;
+      background: rgba(22, 33, 62, 0.8);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #eee;
+      font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .input-wrapper input::placeholder {
+      color: #666;
+    }
+
+    .send-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .attach-btn {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #555;
+      cursor: not-allowed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.5;
+    }
+
+    .image-preview {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      background: rgba(22, 33, 62, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: none;
+    }
+
+    .image-preview.show {
+      display: block;
+    }
+
+    .image-preview-item {
+      position: relative;
+      display: inline-block;
+    }
+
+    .image-preview-item img {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .image-preview-item .remove-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      background: #ef4444;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .message.user .message-image {
+      max-width: 300px;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+
+    .message.bot .content img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 8px 0;
+    }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: rgba(22, 33, 62, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 14px 24px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .stop-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: none;
+    }
+
+    .stop-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .stop-btn.show {
+      display: block;
+    }
+
+    .ai-status {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(102, 126, 234, 0.15);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #a5b4fc;
+    }
+
+    .ai-status.show {
+      display: flex;
+    }
+
+    .ai-status .status-icon {
+      width: 8px;
+      height: 8px;
+      background: #667eea;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #888;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      max-width: 400px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ============ Mobile Responsive ============ */
+    @media screen and (max-width: 768px) {
+      /* Login Page */
+      .login-container {
+        padding: 16px;
+      }
+
+      .login-box {
+        padding: 28px 20px;
+        border-radius: 12px;
+      }
+
+      .login-box h1 {
+        font-size: 24px;
+      }
+
+      .login-box .subtitle {
+        font-size: 13px;
+        margin-bottom: 24px;
+      }
+
+      .form-group input {
+        padding: 12px 14px;
+        font-size: 16px; /* 防止 iOS 缩放 */
+      }
+
+      .login-btn {
+        padding: 12px;
+      }
+
+      /* Chat Header */
+      .header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .header-left {
+        flex: 1;
+        min-width: 0;
+        gap: 10px;
+      }
+
+      .header h1 {
+        font-size: 18px;
+        white-space: nowrap;
+      }
+
+      .header-right {
+        gap: 10px;
+      }
+
+      .user-info {
+        font-size: 13px;
+      }
+
+      .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
+
+      .logout-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      /* Bot List */
+      .bot-list {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        max-width: 100%;
+        padding-bottom: 2px;
+      }
+
+      .bot-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      .bot-chip {
+        padding: 4px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .status-badge {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+
+      /* Chat Container */
+      .chat-container {
+        padding: 16px 12px;
+        gap: 12px;
+      }
+
+      /* Messages */
+      .message {
+        max-width: 88%;
+        padding: 12px 14px;
+        font-size: 14px;
+        border-radius: 14px;
+        line-height: 1.5;
+      }
+
+      .message.bot .bot-name {
+        font-size: 11px;
+        margin-bottom: 4px;
+      }
+
+      .message.bot .content {
+        line-height: 1.6;
+      }
+
+      .message.bot .content code {
+        font-size: 12px;
+        padding: 2px 5px;
+      }
+
+      .message.bot .content pre {
+        padding: 12px;
+        margin: 10px -6px;
+        border-radius: 6px;
+        font-size: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .message.bot .content pre code {
+        font-size: 12px;
+        white-space: pre;
+      }
+
+      .message.bot .content ul,
+      .message.bot .content ol {
+        padding-left: 20px;
+        margin: 8px 0;
+      }
+
+      .message.bot .content h1 { font-size: 1.25em; }
+      .message.bot .content h2 { font-size: 1.15em; }
+      .message.bot .content h3 { font-size: 1.05em; }
+
+      .message.bot .content blockquote {
+        padding: 6px 12px;
+        margin: 8px 0;
+      }
+
+      .message.bot .content table {
+        font-size: 13px;
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .message.bot .content th,
+      .message.bot .content td {
+        padding: 6px 10px;
+      }
+
+      .message.user .message-image {
+        max-width: 200px;
+        max-height: 150px;
+      }
+
+      /* Copy button always visible on mobile */
+      .copy-btn {
+        opacity: 1;
+        padding: 3px 6px;
+        font-size: 11px;
+      }
+
+      /* Input Container */
+      .input-container {
+        padding: 12px;
+      }
+
+      .input-wrapper {
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .input-wrapper input {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 14px;
+        font-size: 16px; /* 防止 iOS 缩放 */
+        border-radius: 10px;
+      }
+
+      .send-btn,
+      .stop-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 10px;
+      }
+
+      .attach-btn {
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      .attach-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .ai-status {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 16px;
+      }
+
+      /* Mention Popup */
+      .mention-popup {
+        max-height: 180px;
+        border-radius: 10px;
+        margin-bottom: 6px;
+      }
+
+      .mention-item {
+        padding: 10px 14px;
+        gap: 8px;
+      }
+
+      .mention-item .bot-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        font-size: 12px;
+      }
+
+      .mention-item .bot-name {
+        font-size: 13px;
+      }
+
+      .mention-item .bot-id {
+        font-size: 11px;
+      }
+
+      /* Image Preview */
+      .image-preview {
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      .image-preview-item img {
+        max-width: 150px;
+        max-height: 100px;
+      }
+
+      /* Empty State */
+      .empty-state {
+        padding: 30px 20px;
+      }
+
+      .empty-state h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .empty-state p {
+        font-size: 14px;
+      }
+
+      /* Toast */
+      .toast {
+        left: 16px;
+        right: 16px;
+        transform: translateX(0) translateY(-100px);
+        padding: 12px 20px;
+        font-size: 13px;
+        border-radius: 10px;
+      }
+
+      .toast.show {
+        transform: translateX(0) translateY(0);
+      }
+    }
+
+    /* Extra small screens */
+    @media screen and (max-width: 380px) {
+      .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .header h1 {
+        font-size: 16px;
+      }
+
+      .send-btn,
+      .stop-btn {
+        padding: 12px 16px;
+      }
+
+      .message {
+        max-width: 92%;
+      }
+
+      .user-info span {
+        display: none;
+      }
+    }
+
+    /* Landscape mode on mobile */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+      .header {
+        padding: 8px 16px;
+      }
+
+      .chat-container {
+        padding: 12px;
+      }
+
+      .input-container {
+        padding: 8px 12px;
+      }
+
+      .empty-state {
+        padding: 20px;
+      }
+    }
+
+    /* Safe area for notched devices */
+    @supports (padding: max(0px)) {
+      .header {
+        padding-top: max(12px, env(safe-area-inset-top));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+      }
+
+      .input-container {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+      }
+
+      .chat-container {
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-right: max(12px, env(safe-area-inset-right));
+      }
+    }
+
+    /* Prevent text selection on buttons */
+    button {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Smooth scrolling */
+    .chat-container {
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+  </style>
+</head>
+<body>
+  <!-- ============ 配置区域 ============ -->
+  <script>
+    // 网关地址：默认使用当前页面的地址（相对路径）
+    // 如果需要跨域访问，改成完整地址如 "http://your-server:17392"
+    const GATEWAY_URL = "";
+  </script>
+  <!-- ============ 配置区域结束 ============ -->
+
+  <!-- Toast 提示 -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Login Page -->
+  <div class="login-container" id="loginPage">
+    <div class="login-box">
+      <h1>OpenClaw</h1>
+      <p class="subtitle">智能助手聊天平台</p>
+
+      <div class="login-error" id="loginError"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" name="username" placeholder="请输入用户名" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" name="password" placeholder="请输入密码" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">登录</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat Page -->
+  <div class="chat-page" id="chatPage">
+    <div class="header">
+      <div class="header-left">
+        <h1>OpenClaw</h1>
+        <div class="bot-list" id="botList">
+          <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">连接中...</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userName">用户</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">退出</button>
+      </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="empty-state" id="emptyState">
+        <h2>开始聊天</h2>
+        <p>输入消息与 AI 助手对话。支持使用 @机器人名 指定目标机器人。</p>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <div class="input-wrapper">
+        <div class="mention-popup" id="mentionPopup"></div>
+        <div class="image-preview" id="imagePreview"></div>
+        <button class="attach-btn" id="attachBtn" onclick="showToast('图片上传功能暂不支持')" title="功能暂不支持">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </button>
+        <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="输入消息... (输入 @ 选择机器人)"
+          autocomplete="off"
+        >
+        <div class="ai-status" id="aiStatus">
+          <span class="status-icon"></span>
+          <span>AI 回答中...</span>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+        <button class="stop-btn" id="stopBtn" onclick="stopResponse()">停止</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = localStorage.getItem("authToken");
+    let currentUser = null;
+    let isSending = false;
+    let onlineBots = [];
+    let mentionIndex = -1;
+    let abortController = null;
+    let pendingImage = null; // 待发送的图片 base64
+
+    // 配置 marked
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try {
+            return hljs.highlight(code, { language: lang }).value;
+          } catch (e) {}
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: true,
+      gfm: true
+    });
+
+    // Toast 提示函数
+    function showToast(message, duration = 2500) {
+      const toast = document.getElementById("toast");
+      toast.innerHTML = `<span class="toast-icon">ℹ️</span>${message}`;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, duration);
+    }
+
+    // 渲染 Markdown
+    function renderMarkdown(text) {
+      try {
+        let html = marked.parse(text);
+        // 给代码块添加复制按钮
+        html = html.replace(/<pre><code/g, '<pre><button class="copy-btn" onclick="copyCode(this)">复制</button><code');
+        return html;
+      } catch (e) {
+        return escapeHtml(text);
+      }
+    }
+
+    // 复制代码
+    function copyCode(btn) {
+      const code = btn.nextElementSibling.textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = "已复制";
+        setTimeout(() => btn.textContent = "复制", 2000);
+      });
+    }
+
+    // 图片选择处理
+    function handleImageSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        alert("请选择图片文件");
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert("图片大小不能超过 10MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        pendingImage = e.target.result;
+        showImagePreview(pendingImage);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function showImagePreview(dataUrl) {
+      const preview = document.getElementById("imagePreview");
+      preview.innerHTML = `
+        <div class="image-preview-item">
+          <img src="${dataUrl}" alt="预览">
+          <button class="remove-btn" onclick="removeImage()">&times;</button>
+        </div>
+      `;
+      preview.classList.add("show");
+    }
+
+    function removeImage() {
+      pendingImage = null;
+      document.getElementById("imagePreview").classList.remove("show");
+      document.getElementById("imagePreview").innerHTML = "";
+      document.getElementById("imageInput").value = "";
+    }
+
+    // Check if already logged in
+    if (authToken) {
+      checkSession();
+    }
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/me`, {
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = data.user;
+          showChatPage();
+          checkBots();
+        } else {
+          localStorage.removeItem("authToken");
+          authToken = null;
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    }
+
+    // Login form
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const loginBtn = document.getElementById("loginBtn");
+      const errorDiv = document.getElementById("loginError");
+
+      if (!username || !password) return;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "登录中...";
+      errorDiv.style.display = "none";
+
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "登录失败");
+        }
+
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem("authToken", authToken);
+
+        showChatPage();
+        checkBots();
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.style.display = "block";
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "登录";
+      }
+    });
+
+    function showChatPage() {
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("chatPage").style.display = "flex";
+
+      if (currentUser) {
+        document.getElementById("userName").textContent = currentUser.displayName || currentUser.username;
+        document.getElementById("userAvatar").textContent = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
+      }
+
+      document.getElementById("messageInput").focus();
+    }
+
+    async function logout() {
+      try {
+        await fetch(`${GATEWAY_URL}/api/logout`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+
+      localStorage.removeItem("authToken");
+      authToken = null;
+      currentUser = null;
+      location.reload();
+    }
+
+    async function checkBots() {
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/bots`, {
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+
+        const data = await res.json();
+        onlineBots = data.bots || [];
+
+        const botList = document.getElementById("botList");
+        const dot = document.getElementById("statusDot");
+        const text = document.getElementById("statusText");
+
+        if (onlineBots.length > 0) {
+          dot.classList.add("online");
+          // 显示机器人列表
+          botList.innerHTML = onlineBots.map(bot => `
+            <div class="bot-chip" onclick="insertMention('${bot.id}')">
+              <span class="dot"></span>
+              <span>${escapeHtml(bot.name || bot.id)}</span>
+            </div>
+          `).join('');
+        } else {
+          dot.classList.remove("online");
+          botList.innerHTML = `
+            <div class="status-badge">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText">无可用机器人</span>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error("Check bots error:", err);
+      }
+    }
+
+    function insertMention(botId) {
+      const input = document.getElementById("messageInput");
+      const value = input.value;
+      // 如果已经有 @ 开头，替换掉
+      if (value.startsWith("@")) {
+        const spaceIdx = value.indexOf(" ");
+        if (spaceIdx > 0) {
+          input.value = `@${botId} ${value.substring(spaceIdx + 1)}`;
+        } else {
+          input.value = `@${botId} `;
+        }
+      } else {
+        input.value = `@${botId} ${value}`;
+      }
+      input.focus();
+      hideMentionPopup();
+    }
+
+    // Refresh bots status every 15s
+    setInterval(checkBots, 15000);
+
+    function addMessage(content, type, botName = null, imageUrl = null) {
+      const container = document.getElementById("chatContainer");
+      const emptyState = document.getElementById("emptyState");
+
+      if (emptyState) {
+        emptyState.remove();
+      }
+
+      const div = document.createElement("div");
+      div.className = `message ${type}`;
+
+      if (type === "bot" || type.includes("bot")) {
+        div.className = "message bot";
+        div.innerHTML = `<div class="bot-name">${escapeHtml(botName || "AI")}</div><div class="content">${escapeHtml(content)}</div>`;
+      } else {
+        let html = escapeHtml(content);
+        if (imageUrl) {
+          html += `<img class="message-image" src="${imageUrl}" alt="图片">`;
+        }
+        div.innerHTML = html;
+      }
+
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return div;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function sendMessage() {
+      if (isSending) return;
+
+      const input = document.getElementById("messageInput");
+      const message = input.value.trim();
+      const imageToSend = pendingImage;
+
+      if (!message && !imageToSend) return;
+
+      input.value = "";
+      removeImage(); // 清除图片预览
+      isSending = true;
+      abortController = new AbortController();
+
+      document.getElementById("sendBtn").classList.add("hidden");
+      document.getElementById("stopBtn").classList.add("show");
+      document.getElementById("aiStatus").classList.add("show");
+
+      addMessage(message || "(图片)", "user", null, imageToSend);
+      const botDiv = addMessage("", "bot", "AI");
+      const contentDiv = botDiv.querySelector(".content");
+
+      // 显示思考中动画
+      contentDiv.innerHTML = '<div class="thinking-dots"><span></span><span></span><span></span></div>';
+
+      let botName = "AI";
+      let fullContent = "";
+
+      try {
+        const payload = { message: message || "请描述这张图片" };
+        if (imageToSend) {
+          payload.image = imageToSend;
+        }
+
+        const res = await fetch(`${GATEWAY_URL}/api/chat/stream`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify(payload),
+          signal: abortController.signal
+        });
+
+        if (res.status === 401) {
+          botDiv.className = "message error";
+          botDiv.textContent = "会话已过期，请重新登录";
+          setTimeout(logout, 2000);
+          return;
+        }
+
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || "请求失败");
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const text = decoder.decode(value, { stream: true });
+          const lines = text.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                if (data.type === "start") {
+                  botName = data.botName || data.botId || "AI";
+                  botDiv.querySelector(".bot-name").textContent = botName;
+                } else if (data.type === "chunk") {
+                  if (fullContent === "") {
+                    // 第一个内容块，移除思考动画
+                    contentDiv.innerHTML = "";
+                  }
+                  fullContent += data.content;
+                  // 流式时用纯文本，结束后再渲染 Markdown
+                  contentDiv.textContent = fullContent;
+                  document.getElementById("chatContainer").scrollTop = document.getElementById("chatContainer").scrollHeight;
+                } else if (data.type === "end") {
+                  // 流结束，渲染 Markdown
+                  if (fullContent) {
+                    contentDiv.innerHTML = renderMarkdown(fullContent);
+                  }
+                } else if (data.type === "error") {
+                  throw new Error(data.error);
+                }
+              } catch (parseErr) {
+                // Ignore parse errors for incomplete chunks
+              }
+            }
+          }
+        }
+
+        if (!fullContent) {
+          contentDiv.textContent = "(无响应)";
+        } else {
+          // 最终渲染 Markdown
+          contentDiv.innerHTML = renderMarkdown(fullContent);
+        }
+      } catch (err) {
+        if (err.name === "AbortError") {
+          if (fullContent) {
+            contentDiv.innerHTML = renderMarkdown(fullContent) + '<p style="color:#888;margin-top:12px">(已停止)</p>';
+          } else {
+            contentDiv.textContent = "(已停止)";
+          }
+        } else {
+          botDiv.className = "message error";
+          botDiv.textContent = "发送失败: " + err.message;
+        }
+      } finally {
+        isSending = false;
+        abortController = null;
+        document.getElementById("sendBtn").classList.remove("hidden");
+        document.getElementById("stopBtn").classList.remove("show");
+        document.getElementById("aiStatus").classList.remove("show");
+        input.focus();
+      }
+    }
+
+    function stopResponse() {
+      if (abortController) {
+        abortController.abort();
+      }
+    }
+
+    // Enter to send
+    document.getElementById("messageInput").addEventListener("keydown", (e) => {
+      const popup = document.getElementById("mentionPopup");
+      const isPopupVisible = popup.classList.contains("show");
+
+      if (isPopupVisible) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          mentionIndex = Math.min(mentionIndex + 1, onlineBots.length - 1);
+          updateMentionSelection();
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          mentionIndex = Math.max(mentionIndex - 1, 0);
+          updateMentionSelection();
+        } else if (e.key === "Enter" || e.key === "Tab") {
+          e.preventDefault();
+          if (mentionIndex >= 0 && onlineBots[mentionIndex]) {
+            selectMention(onlineBots[mentionIndex]);
+          }
+        } else if (e.key === "Escape") {
+          hideMentionPopup();
+        }
+      } else if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById("messageInput").addEventListener("input", (e) => {
+      const value = e.target.value;
+      const cursorPos = e.target.selectionStart;
+
+      // 检测 @ 符号
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const atMatch = textBeforeCursor.match(/@(\S*)$/);
+
+      if (atMatch && onlineBots.length > 0) {
+        const query = atMatch[1].toLowerCase();
+        const filtered = onlineBots.filter(bot =>
+          bot.id.toLowerCase().includes(query) ||
+          (bot.name && bot.name.toLowerCase().includes(query))
+        );
+        if (filtered.length > 0) {
+          showMentionPopup(filtered);
+        } else {
+          hideMentionPopup();
+        }
+      } else {
+        hideMentionPopup();
+      }
+    });
+
+    function showMentionPopup(bots) {
+      const popup = document.getElementById("mentionPopup");
+      mentionIndex = 0;
+
+      popup.innerHTML = bots.map((bot, idx) => `
+        <div class="mention-item ${idx === 0 ? 'selected' : ''}" data-idx="${idx}" onclick="selectMention(onlineBots.find(b => b.id === '${bot.id}'))">
+          <div class="bot-icon">${(bot.name || bot.id).charAt(0).toUpperCase()}</div>
+          <div class="bot-info">
+            <div class="bot-name">${escapeHtml(bot.name || bot.id)}</div>
+            <div class="bot-id">@${escapeHtml(bot.id)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      popup.classList.add("show");
+    }
+
+    function hideMentionPopup() {
+      document.getElementById("mentionPopup").classList.remove("show");
+      mentionIndex = -1;
+    }
+
+    function updateMentionSelection() {
+      const items = document.querySelectorAll(".mention-item");
+      items.forEach((item, idx) => {
+        item.classList.toggle("selected", idx === mentionIndex);
+      });
+    }
+
+    function selectMention(bot) {
+      const input = document.getElementById("messageInput");
+      const value = input.value;
+      const cursorPos = input.selectionStart;
+
+      // 找到 @ 的位置并替换
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const atIdx = textBeforeCursor.lastIndexOf("@");
+
+      if (atIdx >= 0) {
+        const before = value.substring(0, atIdx);
+        const after = value.substring(cursorPos);
+        input.value = `${before}@${bot.id} ${after}`;
+        // 把光标移到 @ 后面
+        const newPos = atIdx + bot.id.length + 2;
+        input.setSelectionRange(newPos, newPos);
+      }
+
+      hideMentionPopup();
+      input.focus();
+    }
+  </script>
+</body>
+</html>

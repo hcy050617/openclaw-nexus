@@ -15,6 +15,7 @@ export type MessageToBot = {
   content: string;
   from: string;
   replyTo?: string;
+  image?: string; // base64 图片数据
   timestamp: number;
 };
 
@@ -52,6 +53,7 @@ export type UserChatRequest = {
   message: string;
   target?: string; // bot id, defaults to first available
   conversationId?: string;
+  image?: string; // base64 图片数据
 };
 
 export type UserChatResponse = {

@@ -1,5 +1,5 @@
-import type { ClawdbotPluginApi } from "clawdbot/plugin-sdk";
-import { emptyPluginConfigSchema } from "clawdbot/plugin-sdk";
+import type { OpenclawPluginApi } from "openclaw/plugin-sdk";
+import { emptyPluginConfigSchema } from "openclaw/plugin-sdk";
 import { gatewayPlugin } from "./src/channel.js";
 import { setGatewayRuntime } from "./src/runtime.js";
 
@@ -11,9 +11,9 @@ export { gatewayPlugin } from "./src/channel.js";
 const plugin = {
   id: "nexus",
   name: "Nexus Channel",
-  description: "Connect Clawdbot/Moltbot to Nexus Gateway",
+  description: "Connect OpenClaw to Nexus Gateway",
   configSchema: emptyPluginConfigSchema(),
-  register(api: ClawdbotPluginApi) {
+  register(api: OpenclawPluginApi) {
     setGatewayRuntime(api.runtime);
     api.registerChannel({ plugin: gatewayPlugin });
   },

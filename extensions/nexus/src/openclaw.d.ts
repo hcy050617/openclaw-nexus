@@ -1,10 +1,10 @@
 declare module "openclaw/plugin-sdk" {
   export type PluginRuntime = any;
-  export type openclawPluginApi = {
+  export type OpenclawPluginApi = {
     runtime: PluginRuntime;
     registerChannel: (opts: { plugin: ChannelPlugin<any> }) => void;
   };
-  export type openclawConfig = any;
+  export type OpenclawConfig = any;
   export type RuntimeEnv = any;
   export type HistoryEntry = {
     sender: string;
@@ -27,7 +27,7 @@ declare module "openclaw/plugin-sdk" {
     pairing?: {
       idLabel: string;
       normalizeAllowEntry: (entry: string) => string;
-      notifyApproval?: (params: { cfg: openclawConfig; id: string }) => Promise<void>;
+      notifyApproval?: (params: { cfg: OpenclawConfig; id: string }) => Promise<void>;
     };
     capabilities: {
       chatTypes: ("direct" | "channel")[];
@@ -50,21 +50,21 @@ declare module "openclaw/plugin-sdk" {
     };
     config: {
       listAccountIds: () => string[];
-      resolveAccount: (cfg: openclawConfig) => T;
+      resolveAccount: (cfg: OpenclawConfig) => T;
       defaultAccountId: () => string;
-      setAccountEnabled: (params: { cfg: openclawConfig; enabled: boolean }) => openclawConfig;
-      deleteAccount: (params: { cfg: openclawConfig }) => openclawConfig;
-      isConfigured: (account: T, cfg: openclawConfig) => boolean;
+      setAccountEnabled: (params: { cfg: OpenclawConfig; enabled: boolean }) => OpenclawConfig;
+      deleteAccount: (params: { cfg: OpenclawConfig }) => OpenclawConfig;
+      isConfigured: (account: T, cfg: OpenclawConfig) => boolean;
       describeAccount: (account: T) => any;
-      resolveAllowFrom: (params: { cfg: openclawConfig }) => (string | number)[];
+      resolveAllowFrom: (params: { cfg: OpenclawConfig }) => (string | number)[];
       formatAllowFrom: (params: { allowFrom: (string | number)[] }) => string[];
     };
     security?: {
-      collectWarnings?: (params: { cfg: openclawConfig }) => string[];
+      collectWarnings?: (params: { cfg: OpenclawConfig }) => string[];
     };
     setup?: {
       resolveAccountId: () => string;
-      applyAccountConfig: (params: { cfg: openclawConfig }) => openclawConfig;
+      applyAccountConfig: (params: { cfg: OpenclawConfig }) => OpenclawConfig;
     };
     onboarding?: any;
     messaging?: {
@@ -79,7 +79,7 @@ declare module "openclaw/plugin-sdk" {
     status: {
       defaultRuntime: any;
       buildChannelSummary: (params: { snapshot: any }) => any;
-      probeAccount: (params: { cfg: openclawConfig }) => Promise<any>;
+      probeAccount: (params: { cfg: OpenclawConfig }) => Promise<any>;
       buildAccountSnapshot: (params: { account: T; runtime: any; probe: any }) => any;
     };
     gateway: {
@@ -91,13 +91,14 @@ declare module "openclaw/plugin-sdk" {
     chunker: (text: string, limit: number) => string[];
     chunkerMode: string;
     textChunkLimit: number;
-    sendText: (params: { cfg: openclawConfig; to: string; text: string }) => Promise<any>;
-    sendMedia: (params: { cfg: openclawConfig; to: string; text?: string; mediaUrl?: string }) => Promise<any>;
+    sendText: (params: { cfg: OpenclawConfig; to: string; text: string }) => Promise<any>;
+    sendMedia: (params: { cfg: OpenclawConfig; to: string; text?: string; mediaUrl?: string }) => Promise<any>;
   };
   export type ReplyDispatcher = {
     sendText: (params: { text: string }) => Promise<any>;
     sendMedia: (params: { text?: string; mediaUrl?: string }) => Promise<any>;
     sendBlockReply: (params: { text: string }) => Promise<any>;
+    sendFinalReply: (params: { text: string }) => Promise<any>;
     waitForIdle: () => Promise<void>;
   };
   export type ReplyDispatcherOptions = {

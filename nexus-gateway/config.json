@@ -1,5 +1,6 @@
 {
   "port": 17392,
+  "botToken": "",
   "users": {
     "admin": {
       "password": "admin123",
