@@ -54,8 +54,25 @@ npx @houchenyang/nexus-gateway
 首次启动会自动创建默认配置。
 
 ```bash
+# 安装 pm2
+npm install -g pm2
+
 # 后台启动
-nohup nexus-gateway > nexus.log 2>&1 &
+pm2 start nexus-gateway --name nexus
+
+# 查看状态
+pm2 status
+
+# 查看日志
+pm2 logs nexus
+
+# 停止/重启
+pm2 stop nexus
+pm2 restart nexus
+
+# 开机自启
+pm2 save
+pm2 startup
 ```
 
 ## 源码运行

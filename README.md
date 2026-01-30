@@ -7,8 +7,13 @@
 中文 | [English](./README_EN.md)
 
 AI 对话转发网关 - 解决国内企业级 IM 应用额度限制问题。
-![img.png](img.png)
-![img_1.png](img_1.png)
+
+## 预览
+
+![登录界面](img.png)
+![聊天界面](img_1.png)
+![多 Bot 管理](img_2.png)
+
 ## 痛点
 
 在国内使用 AI 助手对接企业级 IM（如飞书、钉钉、企业微信）时，常常面临：
