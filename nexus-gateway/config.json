@@ -1,0 +1,9 @@
+{
+  "port": 17392,
+  "users": {
+    "admin": {
+      "password": "admin123",
+      "displayName": "管理员"
+    }
+  }
+}

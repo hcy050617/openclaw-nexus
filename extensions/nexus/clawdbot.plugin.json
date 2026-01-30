@@ -1,0 +1,9 @@
+{
+  "id": "nexus",
+  "channels": ["nexus"],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

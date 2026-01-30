@@ -1,0 +1,42 @@
+{
+  "name": "@moltbot/nexus",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Clawdbot/Moltbot channel plugin for connecting to Nexus Gateway",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "index.ts",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "clawdbot": {
+    "extensions": [
+      "./dist/index.js"
+    ],
+    "channel": {
+      "id": "nexus",
+      "label": "Nexus",
+      "selectionLabel": "Nexus Gateway",
+      "blurb": "Connect to Nexus Gateway for AI bot messaging.",
+      "order": 80
+    }
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10",
+    "clawdbot": "2026.1.24-2",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "clawdbot": ">=2026.1.24"
+  }
+}

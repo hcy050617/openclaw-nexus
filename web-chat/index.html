@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moltbot Chat</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ============ Login Page ============ */
+    .login-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-box h1 {
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-box .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #fff;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .login-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .login-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+    }
+
+    /* ============ Chat Page ============ */
+    .chat-page {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background: rgba(22, 33, 62, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #666;
+    }
+
+    .status-dot.online {
+      background: #4ade80;
+      box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+    }
+
+    .bot-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .bot-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: rgba(102, 126, 234, 0.15);
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 16px;
+      font-size: 13px;
+      color: #a5b4fc;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bot-chip:hover {
+      background: rgba(102, 126, 234, 0.25);
+      border-color: rgba(102, 126, 234, 0.5);
+    }
+
+    .bot-chip .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+
+    /* @ 自动补全 */
+    .mention-popup {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: rgba(22, 33, 62, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .mention-popup.show {
+      display: block;
+    }
+
+    .mention-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+
+    .mention-item:hover,
+    .mention-item.selected {
+      background: rgba(102, 126, 234, 0.2);
+    }
+
+    .mention-item .bot-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .mention-item .bot-info {
+      flex: 1;
+    }
+
+    .mention-item .bot-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #eee;
+    }
+
+    .mention-item .bot-id {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      line-height: 1.6;
+      font-size: 15px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.bot .bot-name {
+      font-size: 12px;
+      color: #667eea;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .message.thinking {
+      color: #888;
+    }
+
+    .message.thinking::after {
+      content: "...";
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: "."; }
+      40% { content: ".."; }
+      60%, 100% { content: "..."; }
+    }
+
+    .input-container {
+      padding: 20px 24px;
+      background: rgba(22, 33, 62, 0.8);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      padding: 14px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      color: #eee;
+      font-size: 15px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    .input-wrapper input::placeholder {
+      color: #666;
+    }
+
+    .send-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .send-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #888;
+    }
+
+    .empty-state p {
+      font-size: 15px;
+      max-width: 400px;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <!-- ============ 配置区域 ============ -->
+  <script>
+    // 在这里配置网关地址
+    const GATEWAY_URL = "http://115.190.92.80:17392";
+  </script>
+  <!-- ============ 配置区域结束 ============ -->
+
+  <!-- Login Page -->
+  <div class="login-container" id="loginPage">
+    <div class="login-box">
+      <h1>Moltbot</h1>
+      <p class="subtitle">智能助手聊天平台</p>
+
+      <div class="login-error" id="loginError"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">用户名</label>
+          <input type="text" id="username" name="username" placeholder="请输入用户名" autocomplete="username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">密码</label>
+          <input type="password" id="password" name="password" placeholder="请输入密码" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">登录</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Chat Page -->
+  <div class="chat-page" id="chatPage">
+    <div class="header">
+      <div class="header-left">
+        <h1>Moltbot</h1>
+        <div class="bot-list" id="botList">
+          <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">连接中...</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <div class="user-avatar" id="userAvatar">U</div>
+          <span id="userName">用户</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">退出</button>
+      </div>
+    </div>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="empty-state" id="emptyState">
+        <h2>开始聊天</h2>
+        <p>输入消息与 AI 助手对话。支持使用 @机器人名 指定目标机器人。</p>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <div class="input-wrapper">
+        <div class="mention-popup" id="mentionPopup"></div>
+        <input
+          type="text"
+          id="messageInput"
+          placeholder="输入消息... (输入 @ 选择机器人)"
+          autocomplete="off"
+        >
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = localStorage.getItem("authToken");
+    let currentUser = null;
+    let isSending = false;
+    let onlineBots = [];
+    let mentionIndex = -1;
+
+    // Check if already logged in
+    if (authToken) {
+      checkSession();
+    }
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/me`, {
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = data.user;
+          showChatPage();
+          checkBots();
+        } else {
+          localStorage.removeItem("authToken");
+          authToken = null;
+        }
+      } catch (err) {
+        console.error("Session check failed:", err);
+      }
+    }
+
+    // Login form
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const loginBtn = document.getElementById("loginBtn");
+      const errorDiv = document.getElementById("loginError");
+
+      if (!username || !password) return;
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "登录中...";
+      errorDiv.style.display = "none";
+
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "登录失败");
+        }
+
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem("authToken", authToken);
+
+        showChatPage();
+        checkBots();
+
+      } catch (err) {
+        errorDiv.textContent = err.message;
+        errorDiv.style.display = "block";
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "登录";
+      }
+    });
+
+    function showChatPage() {
+      document.getElementById("loginPage").style.display = "none";
+      document.getElementById("chatPage").style.display = "flex";
+
+      if (currentUser) {
+        document.getElementById("userName").textContent = currentUser.displayName || currentUser.username;
+        document.getElementById("userAvatar").textContent = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
+      }
+
+      document.getElementById("messageInput").focus();
+    }
+
+    async function logout() {
+      try {
+        await fetch(`${GATEWAY_URL}/api/logout`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+      } catch (err) {
+        console.error("Logout error:", err);
+      }
+
+      localStorage.removeItem("authToken");
+      authToken = null;
+      currentUser = null;
+      location.reload();
+    }
+
+    async function checkBots() {
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/bots`, {
+          headers: { "Authorization": `Bearer ${authToken}` }
+        });
+
+        if (res.status === 401) {
+          logout();
+          return;
+        }
+
+        const data = await res.json();
+        onlineBots = data.bots || [];
+
+        const botList = document.getElementById("botList");
+        const dot = document.getElementById("statusDot");
+        const text = document.getElementById("statusText");
+
+        if (onlineBots.length > 0) {
+          dot.classList.add("online");
+          // 显示机器人列表
+          botList.innerHTML = onlineBots.map(bot => `
+            <div class="bot-chip" onclick="insertMention('${bot.id}')">
+              <span class="dot"></span>
+              <span>${escapeHtml(bot.name || bot.id)}</span>
+            </div>
+          `).join('');
+        } else {
+          dot.classList.remove("online");
+          botList.innerHTML = `
+            <div class="status-badge">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText">无可用机器人</span>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error("Check bots error:", err);
+      }
+    }
+
+    function insertMention(botId) {
+      const input = document.getElementById("messageInput");
+      const value = input.value;
+      // 如果已经有 @ 开头，替换掉
+      if (value.startsWith("@")) {
+        const spaceIdx = value.indexOf(" ");
+        if (spaceIdx > 0) {
+          input.value = `@${botId} ${value.substring(spaceIdx + 1)}`;
+        } else {
+          input.value = `@${botId} `;
+        }
+      } else {
+        input.value = `@${botId} ${value}`;
+      }
+      input.focus();
+      hideMentionPopup();
+    }
+
+    // Refresh bots status every 15s
+    setInterval(checkBots, 15000);
+
+    function addMessage(content, type, botName = null) {
+      const container = document.getElementById("chatContainer");
+      const emptyState = document.getElementById("emptyState");
+
+      if (emptyState) {
+        emptyState.remove();
+      }
+
+      const div = document.createElement("div");
+      div.className = `message ${type}`;
+
+      if (type === "bot" && botName) {
+        div.innerHTML = `<div class="bot-name">${escapeHtml(botName)}</div><div class="content">${escapeHtml(content)}</div>`;
+      } else {
+        div.textContent = content;
+      }
+
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return div;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function sendMessage() {
+      if (isSending) return;
+
+      const input = document.getElementById("messageInput");
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      input.value = "";
+      isSending = true;
+      document.getElementById("sendBtn").disabled = true;
+
+      addMessage(message, "user");
+      const botDiv = addMessage("思考中", "bot thinking", "AI");
+
+      try {
+        const res = await fetch(`${GATEWAY_URL}/api/chat`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ message })
+        });
+
+        if (res.status === 401) {
+          botDiv.className = "message error";
+          botDiv.textContent = "会话已过期，请重新登录";
+          setTimeout(logout, 2000);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.error) {
+          botDiv.className = "message error";
+          botDiv.textContent = data.error;
+        } else {
+          botDiv.className = "message bot";
+          const botName = data.botId || "AI";
+          botDiv.innerHTML = `<div class="bot-name">${escapeHtml(botName)}</div><div class="content">${escapeHtml(data.content)}</div>`;
+        }
+      } catch (err) {
+        botDiv.className = "message error";
+        botDiv.textContent = "发送失败: " + err.message;
+      } finally {
+        isSending = false;
+        document.getElementById("sendBtn").disabled = false;
+        input.focus();
+      }
+    }
+
+    // Enter to send
+    document.getElementById("messageInput").addEventListener("keydown", (e) => {
+      const popup = document.getElementById("mentionPopup");
+      const isPopupVisible = popup.classList.contains("show");
+
+      if (isPopupVisible) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          mentionIndex = Math.min(mentionIndex + 1, onlineBots.length - 1);
+          updateMentionSelection();
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          mentionIndex = Math.max(mentionIndex - 1, 0);
+          updateMentionSelection();
+        } else if (e.key === "Enter" || e.key === "Tab") {
+          e.preventDefault();
+          if (mentionIndex >= 0 && onlineBots[mentionIndex]) {
+            selectMention(onlineBots[mentionIndex]);
+          }
+        } else if (e.key === "Escape") {
+          hideMentionPopup();
+        }
+      } else if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.getElementById("messageInput").addEventListener("input", (e) => {
+      const value = e.target.value;
+      const cursorPos = e.target.selectionStart;
+
+      // 检测 @ 符号
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const atMatch = textBeforeCursor.match(/@(\S*)$/);
+
+      if (atMatch && onlineBots.length > 0) {
+        const query = atMatch[1].toLowerCase();
+        const filtered = onlineBots.filter(bot =>
+          bot.id.toLowerCase().includes(query) ||
+          (bot.name && bot.name.toLowerCase().includes(query))
+        );
+        if (filtered.length > 0) {
+          showMentionPopup(filtered);
+        } else {
+          hideMentionPopup();
+        }
+      } else {
+        hideMentionPopup();
+      }
+    });
+
+    function showMentionPopup(bots) {
+      const popup = document.getElementById("mentionPopup");
+      mentionIndex = 0;
+
+      popup.innerHTML = bots.map((bot, idx) => `
+        <div class="mention-item ${idx === 0 ? 'selected' : ''}" data-idx="${idx}" onclick="selectMention(onlineBots.find(b => b.id === '${bot.id}'))">
+          <div class="bot-icon">${(bot.name || bot.id).charAt(0).toUpperCase()}</div>
+          <div class="bot-info">
+            <div class="bot-name">${escapeHtml(bot.name || bot.id)}</div>
+            <div class="bot-id">@${escapeHtml(bot.id)}</div>
+          </div>
+        </div>
+      `).join('');
+
+      popup.classList.add("show");
+    }
+
+    function hideMentionPopup() {
+      document.getElementById("mentionPopup").classList.remove("show");
+      mentionIndex = -1;
+    }
+
+    function updateMentionSelection() {
+      const items = document.querySelectorAll(".mention-item");
+      items.forEach((item, idx) => {
+        item.classList.toggle("selected", idx === mentionIndex);
+      });
+    }
+
+    function selectMention(bot) {
+      const input = document.getElementById("messageInput");
+      const value = input.value;
+      const cursorPos = input.selectionStart;
+
+      // 找到 @ 的位置并替换
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const atIdx = textBeforeCursor.lastIndexOf("@");
+
+      if (atIdx >= 0) {
+        const before = value.substring(0, atIdx);
+        const after = value.substring(cursorPos);
+        input.value = `${before}@${bot.id} ${after}`;
+        // 把光标移到 @ 后面
+        const newPos = atIdx + bot.id.length + 2;
+        input.setSelectionRange(newPos, newPos);
+      }
+
+      hideMentionPopup();
+      input.focus();
+    }
+  </script>
+</body>
+</html>
