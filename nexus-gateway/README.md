@@ -15,19 +15,15 @@ AI Bot Gateway - 连接 Web 用户与 AI 助手的网关服务。
 
 ## 安装
 
-### 方式一：npm 全局安装
-
 ```bash
+# 创建工作目录
+mkdir nexus-gateway && cd nexus-gateway
+
+# 安装
 npm install -g @houchenyang/nexus-gateway
 
-# 启动
+# 启动（会在当前目录生成 config.json 和 index.html）
 nexus-gateway
-```
-
-### 方式二：npx 直接运行
-
-```bash
-npx @houchenyang/nexus-gateway
 ```
 
 ## 配置
@@ -51,14 +47,15 @@ npx @houchenyang/nexus-gateway
 - `botToken`: Bot 连接认证令牌，留空则不校验
 - `users`: Web 用户账号配置
 
-首次启动会自动创建默认配置。
+## 后台运行
 
 ```bash
 # 安装 pm2
 npm install -g pm2
 
-# 后台启动
-pm2 start nexus-gateway --name nexus
+# 在工作目录下启动（重要：必须在 config.json 所在目录执行）
+cd /your/nexus-gateway
+pm2 start $(which nexus-gateway) --name nexus
 
 # 查看状态
 pm2 status
