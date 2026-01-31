@@ -1,6 +1,6 @@
 {
   "name": "@houchenyang/nexus-gateway",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "AI Bot Gateway - Connect web users to AI assistants",
   "type": "module",
   "main": "dist/index.js",

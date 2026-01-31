@@ -1,6 +1,6 @@
 {
   "name": "@houchenyang/nexus",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "OpenClaw channel plugin for connecting to Nexus Gateway",
   "license": "MIT",
@@ -31,7 +31,13 @@
       "order": 80
     }
   },
-  "keywords": ["openclaw", "nexus", "gateway", "channel", "plugin"],
+  "keywords": [
+    "openclaw",
+    "nexus",
+    "gateway",
+    "channel",
+    "plugin"
+  ],
   "dependencies": {
     "ws": "^8.16.0"
   },

@@ -28,3 +28,6 @@ logs/
 # Cache
 .cache/
 .turbo/
+
+# Claude
+.claude/

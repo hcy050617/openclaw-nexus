@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { WebSocket } from "ws";
 import type { BotInfo, BotMessage, MessageToBot, MessageFromBot } from "./types.js";
 

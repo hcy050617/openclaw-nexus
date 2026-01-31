@@ -6,9 +6,10 @@ import {
   clearHistoryEntriesIfEnabled,
   DEFAULT_GROUP_HISTORY_LIMIT,
 } from "openclaw/plugin-sdk";
-import type { GatewayConfig, GatewayInboundMessage, GatewayMessageContext } from "./types.js";
+import type { GatewayConfig, GatewayInboundMessage, GatewayMessageContext, GatewayMediaInfo } from "./types.js";
 import { getGatewayRuntime } from "./runtime.js";
 import { createGatewayReplyDispatcher } from "./reply-dispatcher.js";
+import { saveBase64ImageToFile, buildGatewayMediaPayload } from "./media.js";
 
 export function parseGatewayMessageEvent(event: GatewayInboundMessage): GatewayMessageContext {
   // Gateway server sends: { type: "chat", id, content, from, timestamp, image? }
@@ -94,15 +95,26 @@ export async function handleGatewayMessage(params: {
       messageBody = `[Replying to: "${ctx.replyTo}"]\n\n${ctx.content}`;
     }
 
-    // 如果有图片，直接将 base64 放入消息体
+    // 处理图片：保存到文件并构建媒体 payload
+    const mediaList: GatewayMediaInfo[] = [];
     if (ctx.image) {
-      const imageData = ctx.image;
-      if (!messageBody) {
-        messageBody = "请描述这张图片";
+      const mediaMaxBytes = ((gatewayCfg?.mediaMaxMb ?? 30) * 1024 * 1024);
+      log(`nexus: processing image (max ${mediaMaxBytes} bytes)`);
+
+      const mediaInfo = await saveBase64ImageToFile(ctx.image, mediaMaxBytes);
+      if (mediaInfo) {
+        mediaList.push(mediaInfo);
+        log(`nexus: saved image to ${mediaInfo.path}`);
+        // 如果没有文本内容，添加默认提示
+        if (!messageBody.trim()) {
+          messageBody = "请描述这张图片";
+        }
+      } else {
+        log(`nexus: failed to save image`);
       }
-      // 将图片 base64 数据直接嵌入消息体
-      messageBody = `${messageBody}\n\n[图片数据]\n${imageData}`;
     }
+
+    const mediaPayload = buildGatewayMediaPayload(mediaList);
 
     const body = core.channel.reply.formatAgentEnvelope({
       channel: "Gateway",
@@ -152,6 +164,7 @@ export async function handleGatewayMessage(params: {
       CommandAuthorized: true,
       OriginatingChannel: "nexus" as const,
       OriginatingTo: gatewayTo,
+      ...mediaPayload,
     });
 
     const { dispatcher, replyOptions, markDispatchIdle } = createGatewayReplyDispatcher({

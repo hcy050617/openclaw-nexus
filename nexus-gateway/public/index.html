@@ -617,12 +617,18 @@
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      color: #555;
-      cursor: not-allowed;
+      color: #aaa;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.5;
+      transition: all 0.2s;
+    }
+
+    .attach-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
     }
 
     .image-preview {
@@ -1218,7 +1224,7 @@
       <div class="input-wrapper">
         <div class="mention-popup" id="mentionPopup"></div>
         <div class="image-preview" id="imagePreview"></div>
-        <button class="attach-btn" id="attachBtn" onclick="showToast('图片上传功能暂不支持')" title="功能暂不支持">
+        <button class="attach-btn" id="attachBtn" onclick="document.getElementById('imageInput').click()" title="上传图片">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <circle cx="8.5" cy="8.5" r="1.5"></circle>

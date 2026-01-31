@@ -7,6 +7,7 @@ export type GatewayConfig = {
   reconnectInterval?: number;
   dmPolicy?: "open" | "pairing" | "allowlist";
   allowFrom?: (string | number)[];
+  mediaMaxMb?: number;  // 最大媒体文件大小（MB），默认 30
 };
 
 export type ResolvedGatewayAccount = {
@@ -76,4 +77,11 @@ export type GatewayBotRegister = {
   botId: string;
   botName: string;
   token: string;
+};
+
+// 媒体信息类型
+export type GatewayMediaInfo = {
+  path: string;
+  contentType?: string;
+  placeholder: string;
 };

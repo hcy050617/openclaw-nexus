@@ -34,7 +34,7 @@ export const gatewayPlugin: ChannelPlugin<ResolvedGatewayAccount> = {
     chatTypes: ["direct", "channel"],
     polls: false,
     threads: false,
-    media: false,
+    media: true,  // 启用媒体支持
     reactions: false,
     edit: false,
     reply: true,
@@ -58,6 +58,7 @@ export const gatewayPlugin: ChannelPlugin<ResolvedGatewayAccount> = {
         reconnectInterval: { type: "integer", minimum: 1000 },
         dmPolicy: { type: "string", enum: ["open", "pairing", "allowlist"] },
         allowFrom: { type: "array", items: { oneOf: [{ type: "string" }, { type: "number" }] } },
+        mediaMaxMb: { type: "integer", minimum: 1, maximum: 100 },
       },
     },
   },
