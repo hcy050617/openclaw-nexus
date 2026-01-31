@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(del \"D:\\\\project\\\\nexus\\\\extensions\\\\nexus\\\\src\\\\clawdbot.d.ts\")"
-    ]
-  }
-}
